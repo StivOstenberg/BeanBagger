@@ -112,8 +112,30 @@ String getDefaultDomain = mbsc.getDefaultDomain();
 String[] getDomains=mbsc.getDomains();
 
 
-Set<ObjectInstance> beans = mbsc.queryMBeans(null, null);
 
+
+
+Set<ObjectInstance> beans = mbsc.queryMBeans(null, null);
+for( ObjectInstance instance : beans )
+{
+    String daclassname = instance.getClassName();
+    System.out.println("Processing me a bean: " + daclassname);   
+
+    MBeanInfo info = mbsc.getMBeanInfo( instance.getObjectName() );
+    MBeanAttributeInfo[] Abe = info.getAttributes();
+    for(MBeanAttributeInfo aninfo : Abe)
+    {
+        String myname = aninfo.getName();
+        String mydesc = aninfo.getDescription();
+        
+           System.out.println("    Attribute : " +daclassname + ":" + myname + ":" + mydesc); 
+    }
+
+    
+    
+   
+ 
+}
 
 
 //mbsc.getMBeanInfo(DOMAIN);
