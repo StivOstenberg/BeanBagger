@@ -17,6 +17,11 @@ import java.util.Properties;
 import javax.management.*;
 import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
+import javax.management.remote.*;
+
+
+
+
 
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
@@ -32,38 +37,34 @@ import javax.management.remote.JMXServiceURL;
 public class BeanBagger {
 	private static final String CONNECTOR_ADDRESS_PROPERTY = "com.sun.management.jmxremote.localConnectorAddress";
         public static  String  TARGET = "";
-        public static String DOMAIN = "";
+        public static String BEAN = "";
         public static VirtualMachineDescriptor TARGETDESCRIPTOR ;
-        static JMXConnector connector = null;
+        static JMXConnector myJMXconnector = null;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
         
-        if(args[0].length()>0 && args[1].length()>0 )
+        if(args[0].length()>0  )
         {
             TARGET=args[0];
-            DOMAIN=args[1];
+            if(args.length>1)
+            {
+            BEAN=args[1];
+            }
+            else
+            {
+                BEAN="*";
+            }
         }
         else
         {
-            System.out.println("Beanbagger {process} {domain}");
+            System.out.println("Beanbagger {process} {bean}");
+            System.out.println("process: Process Name to try to connect to:");
+            System.out.println("bean:  restrict data to just one bean. Default is all beans ");
         }
         
-        
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        Set<ObjectInstance> instances = server.queryMBeans(null, null);
-        
-        Iterator<ObjectInstance> iterator = instances.iterator();
-        while (iterator.hasNext()) {
-            ObjectInstance instance = iterator.next();
-            System.out.print("Class Name:t" + instance.getClassName());
-            System.out.print(" - ");
-            System.out.println("Object Name:t" + instance.getObjectName());
-            //System.out.println("****************************************");
-        }
-        System.out.println("****************************************");
-        
+               
         
         //The following code grabs a list of running VMs and sees if they match our target--------------------------------------
         Map<String, VirtualMachine> result = new HashMap<>();
@@ -102,43 +103,65 @@ public class BeanBagger {
             }
         
  ///-------------If we get here, we have identified an instance matching our criteria       
-connector = getLocalConnection(VirtualMachine.attach(TARGETDESCRIPTOR));// Connects to the process containing our beans
-MBeanServerConnection mbsc = connector.getMBeanServerConnection(); //Connects to the MBean server for that process.
+myJMXconnector = getLocalConnection(VirtualMachine.attach(TARGETDESCRIPTOR));// Connects to the process containing our beans
+MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
 
 
-System.out.println("Beans found: " +  mbsc.getMBeanCount());
+System.out.println("Beans found: " +  myJMXConnection.getMBeanCount());
 
-String getDefaultDomain = mbsc.getDefaultDomain();
-String[] getDomains=mbsc.getDomains();
-
-
+String getDefaultDomain = myJMXConnection.getDefaultDomain();
+String[] getDomains=myJMXConnection.getDomains();
 
 
 
-Set<ObjectInstance> beans = mbsc.queryMBeans(null, null);
+
+
+Set<ObjectInstance> beans = myJMXConnection.queryMBeans(null, null);
 for( ObjectInstance instance : beans )
 {
     String daclassname = instance.getClassName();
+    if(daclassname.contains(BEAN) || BEAN.contentEquals("*"))
+    {
     System.out.println("Processing me a bean: " + daclassname);   
 
-    MBeanInfo info = mbsc.getMBeanInfo( instance.getObjectName() );
-    MBeanAttributeInfo[] Abe = info.getAttributes();
-    for(MBeanAttributeInfo aninfo : Abe)
+    MBeanInfo info = myJMXConnection.getMBeanInfo( instance.getObjectName() );
+    
+    MBeanAttributeInfo[] myAttributeArray = info.getAttributes();
+    for(MBeanAttributeInfo thisAttributeInfo : myAttributeArray)
     {
-        String myname = aninfo.getName();
-        String mydesc = aninfo.getDescription();
+        String attvalue = "";
+        String myname = thisAttributeInfo.getName();
+        //String mydesc = thisAttributeInfo.getDescription();
+        String mytype = thisAttributeInfo.getType();
+
         
-           System.out.println("    Attribute : " +daclassname + ":" + myname + ":" + mydesc); 
+        
+        //attvalue = (String)myJMXConnection.getAttribute(instance.getObjectName(), );
+        
+        System.out.println("  Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue); 
     }
 
     
     
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    }
    
  
 }
 
 
-//mbsc.getMBeanInfo(DOMAIN);
+//mbsc.getMBeanInfo(BEAN);
 
 
 
