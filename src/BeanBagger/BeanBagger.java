@@ -22,6 +22,7 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+
 /**
  *
  * @author s.ostenberg
@@ -155,7 +156,7 @@ for( ObjectInstance instance : beans )
                 System.out.println("  Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;  
         }
-        }
+        } 
         catch(UnsupportedOperationException | RuntimeMBeanException ex)
                 {
                 attvalue = "Unsupported Operation";
@@ -176,7 +177,7 @@ for( ObjectInstance instance : beans )
 
 System.out.println("Stiv's Beanbagger Finished");         
     }
-    
+      
 static JMXConnector getLocalConnection(VirtualMachine vm) throws Exception {
    Properties props = vm.getAgentProperties();
    String connectorAddress = props.getProperty(CONNECTOR_ADDRESS_PROPERTY);
