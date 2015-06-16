@@ -155,19 +155,34 @@ for( ObjectInstance instance : beans )
     String daclassname = instance.getClassName();
     if(daclassname.contains(TARGETBEAN) || TARGETBEAN.contentEquals("*"))
     {
-
-    System.out.println("  Processing me a bean: " + daclassname);   
-
+    MBeanAttributeInfo[] myAttributeArray = null;   
+    
+    try
+    {
     MBeanInfo info = myJMXConnection.getMBeanInfo( instance.getObjectName() );
-    MBeanAttributeInfo[] myAttributeArray = info.getAttributes();
+    myAttributeArray = info.getAttributes(); 
+    System.out.println("  Processing me a bean: " + daclassname);
+    }   
+    catch( UnsupportedOperationException | RuntimeMBeanException | IllegalStateException ex)
+    {
+    System.out.println("  Error processing bean: " + daclassname);  
+    }
+        
+
+   
+    
+
     for(MBeanAttributeInfo thisAttributeInfo : myAttributeArray)
     {
-        String attvalue = "";
-        String myname = thisAttributeInfo.getName();
+       String attvalue = "";
+       String myname = "";
+       String mytype = "";
+       try{
+        myname = thisAttributeInfo.getName();
         //String mydesc = thisAttributeInfo.getDescription();
-        String mytype = thisAttributeInfo.getType();
+        mytype = thisAttributeInfo.getType();
 
-        try{
+
         switch (mytype) {
             case "String":
                 attvalue = (String)myJMXConnection.getAttribute(instance.getObjectName(), myname );
@@ -199,7 +214,7 @@ for( ObjectInstance instance : beans )
                 break;  
         }
         } 
-        catch(UnsupportedOperationException | RuntimeMBeanException ex)
+        catch(Exception ex )
                 {
                 attvalue = "Unsupported Operation";
                 System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);  
@@ -209,10 +224,10 @@ for( ObjectInstance instance : beans )
     }
    
  
-}
+}//End of process JVM instance beans
 
 
-}//End VM iteration
+}//End JVM iteration
 
 
 
