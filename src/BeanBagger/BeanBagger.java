@@ -77,7 +77,7 @@ public class BeanBagger {
             try {
                result.put(desc, VirtualMachine.attach(vmd));
                String DN = vmd.displayName();
-               if(DN.equals(TARGET))
+               if(DN.contains(TARGET))
                      {
                       System.out.println("Target instance found: " + TARGET);
                       TARGETDESCRIPTOR=vmd;
@@ -102,7 +102,12 @@ public class BeanBagger {
               System.exit(1);
             }
         
- ///-------------If we get here, we have identified an instance matching our criteria       
+ ///-------------If we get here, we have identified an instance matching our criteria   
+                    
+                    
+                    
+                    
+                    
 myJMXconnector = getLocalConnection(VirtualMachine.attach(TARGETDESCRIPTOR));// Connects to the process containing our beans
 MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
 
@@ -150,7 +155,11 @@ for( ObjectInstance instance : beans )
             case "long":
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
                 System.out.println("  Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
-                break;     
+                break;
+            case "double":
+                attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
+                System.out.println("  Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
+                break; 
             default:
                 attvalue = "Unsupported type";
                 System.out.println("  Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
