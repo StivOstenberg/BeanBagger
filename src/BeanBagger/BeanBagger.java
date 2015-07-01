@@ -25,13 +25,14 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.json.simple.*;
+
 
 /**
  *
  * @author s.ostenberg
  */
 public class BeanBagger {
+        
 	private static final String CONNECTOR_ADDRESS_PROPERTY = "com.sun.management.jmxremote.localConnectorAddress";
         public static  String  TargetJVM = "";
         public static String TARGETBEAN = "";
@@ -41,6 +42,7 @@ public class BeanBagger {
         public static String OUTFILE = "//tmp//output.yml";
         public static boolean notquiet=true;
         public static boolean supressSun=false;
+        public static org.json.JSONObject Jason = new org.json.JSONObject();
         
     /**
      * @param args the command line arguments
@@ -149,7 +151,12 @@ public class BeanBagger {
             System.out.println("");
         
  ///-------------If we get here, we have identified at least one instance matching our criteria   
-                    
+
+ org.json.JSONObject JinfraScan = new org.json.JSONObject();
+ org.json.JSONArray JServer = new org.json.JSONArray();
+            
+ org.json.JSONObject JVM = new org.json.JSONObject();
+ org.json.JSONArray Beans = new org.json.JSONArray();
                     
 for(VirtualMachineDescriptor avmd: MATCHINGLIST)     
 {
@@ -165,6 +172,12 @@ String[] getDomains=myJMXConnection.getDomains();
 
 
 Set<ObjectInstance> beans = myJMXConnection.queryMBeans(null, null);
+
+org.json.JSONObject Jinstance = new org.json.JSONObject();
+
+
+
+
 for( ObjectInstance instance : beans )
 {
 
@@ -174,6 +187,11 @@ for( ObjectInstance instance : beans )
     if(daclassname.contains(TARGETBEAN) || TARGETBEAN.contentEquals("*"))
     {
     MBeanAttributeInfo[] myAttributeArray = null;   
+    
+    org.json.JSONObject Beanboy = new org.json.JSONObject();
+    org.json.JSONArray BeanieButes = new org.json.JSONArray();
+
+    
     
     try
     {
@@ -185,15 +203,18 @@ for( ObjectInstance instance : beans )
     {
     System.out.println("  Error processing bean: " + daclassname);  
     }
-        
+   
+
+    
     for(MBeanAttributeInfo thisAttributeInfo : myAttributeArray)
     {
        String attvalue = "";
        String myname = "";
        String mytype = "";
+       String mydesc = "";
        try{
         myname = thisAttributeInfo.getName();
-        //String mydesc = thisAttributeInfo.getDescription();
+        mydesc = thisAttributeInfo.getDescription();
         mytype = thisAttributeInfo.getType();
 
 
@@ -226,20 +247,31 @@ for( ObjectInstance instance : beans )
                 {
                 attvalue = "Unsupported Operation";
                 }
-       if(notquiet)
+       boolean dooutput=false;
+       if(notquiet)dooutput=true;
+       else if(!attvalue.startsWith("Unsupported") ) dooutput=true; 
+               
+       if(dooutput)
        {
-       System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
+           System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
+           org.json.JSONObject AtDatas = new org.json.JSONObject();// Create the list of attributes and values into an object.
+           AtDatas.put("Name", myname);
+           AtDatas.put("Type", mytype);
+           AtDatas.put("Value", attvalue);
+           AtDatas.put("Description", mydesc);
+           BeanieButes.put(AtDatas);
+           
        }
-       else
-           if(!attvalue.startsWith("Unsupported") )
-               {
-                 System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);  
-               }
-    }
-    }
+           
+    }//End processing Bean Attributes, add attributes to bean array.
+    Beanboy.put(daclassname, BeanieButes);
+
+    }//End if this bean was skipped.
    
  
 }//End of process JVM instance beans
+
+
 
 
 }//End JVM iteration
