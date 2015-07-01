@@ -39,50 +39,65 @@ public class BeanBagger {
         static JMXConnector myJMXconnector = null;
         public static boolean ExactMatchRequired = false; // ALlows matching TargetVM process based on substring
         public static String OUTFILE = "//tmp//output.yml";
+        public static boolean notquiet=true;
+        public static boolean supressSun=false;
         
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
         
-        if(args.length>0 && args[0].length()>0  )
+        
+        for(int x =0;x<args.length;x++)
         {
-            TargetJVM=args[0];
-            if(args.length>1)
-            {
-            TARGETBEAN=args[1];
-            }
-            else
-            {
-                TARGETBEAN="*";
-            }
-        }
-        else
-        {
-           TargetJVM="*";
-            
-            System.out.println("Beanbagger {process} {bean}");
-            System.out.println("  process: Process Name to try to connect to:");
-            System.out.println("  bean:  optional, restrict data to just one bean. Default is all beans ");
-            System.out.println("\nProcesses found:");
-            List<VirtualMachineDescriptor> list = VirtualMachine.list();
-            for (VirtualMachineDescriptor vmd: list)
-            {
-                if(vmd.displayName().equals(""))
-                {
-                System.out.println("   {Unamed Instance}");
-                }
-                else
-                {
-                 System.out.println("   "+ vmd.displayName());   
-                }
+         String disarg = args[x];
+         switch(disarg)
+         {
+              case "-p":
+                TargetJVM=args[x+1];
+                x++;
+                break;
+              case "-b":
+                TARGETBEAN=args[x+1];
+                x++;
+                break;
+              case "-q":
+                  notquiet=false;
+                  break;
+               case "-m":
+                  supressSun=true;
+                  break;
+               case "-x":
+                  ExactMatchRequired=true;
+                  break;    
+               default:
+                  System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m ");
+                  System.out.println("-p {process}: VM Process Name or substring to try to connect to:");
+                  System.out.println("-b {bean}:  optional, restrict data to just one bean. Default is all beans ");
+                  System.out.println("-x  Requires exact match of VM Process Name");
+                  System.out.println("-q  Filter. Suppresses output of unsupported types or operations.");
+                  System.out.println("-m  Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
+                  System.out.println("\nProcesses found:");  
+                    List<VirtualMachineDescriptor> list = VirtualMachine.list();
+                  for (VirtualMachineDescriptor vmd: list)
+                    {
+                      if(vmd.displayName().equals(""))
+                        {
+                        System.out.println("   {Unamed Instance}");
+                        }
+                      else
+                        {
+                        System.out.println("   "+ vmd.displayName());   
+                        }
 
-            }
-            System.out.println("");
-            //System.exit(1);
+                    }
+                      System.out.println("");
+                      System.exit(1);
+                  
+         }//End switch
         }
         
-               
+  
         
         //The following code grabs a list of running VMs and sees if they match our target--------------------------------------
         Map<String, VirtualMachine> result = new HashMap<>();
@@ -152,7 +167,10 @@ String[] getDomains=myJMXConnection.getDomains();
 Set<ObjectInstance> beans = myJMXConnection.queryMBeans(null, null);
 for( ObjectInstance instance : beans )
 {
+
     String daclassname = instance.getClassName();
+    if(supressSun & (daclassname.startsWith("sun.") | daclassname.startsWith("com.sun."))) continue;
+    
     if(daclassname.contains(TARGETBEAN) || TARGETBEAN.contentEquals("*"))
     {
     MBeanAttributeInfo[] myAttributeArray = null;   
@@ -168,10 +186,6 @@ for( ObjectInstance instance : beans )
     System.out.println("  Error processing bean: " + daclassname);  
     }
         
-
-   
-    
-
     for(MBeanAttributeInfo thisAttributeInfo : myAttributeArray)
     {
        String attvalue = "";
@@ -186,40 +200,41 @@ for( ObjectInstance instance : beans )
         switch (mytype) {
             case "String":
                 attvalue = (String)myJMXConnection.getAttribute(instance.getObjectName(), myname );
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;
             case "java.lang.String":
                 attvalue = (String)myJMXConnection.getAttribute(instance.getObjectName(), myname );
-                System.out.println("    Name:" + myname + "  Type;" + mytype + "  Value:"  + attvalue);
                 break;    
             case "boolean":
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;
             case "int":
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;  
             case "long":
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;
             case "double":
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break; 
             default:
                 attvalue = "Unsupported type";
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
                 break;  
         }
+      
         } 
         catch(Exception ex )
                 {
                 attvalue = "Unsupported Operation";
-                System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);  
                 }
-
+       if(notquiet)
+       {
+       System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
+       }
+       else
+           if(!attvalue.startsWith("Unsupported") )
+               {
+                 System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);  
+               }
     }
     }
    
