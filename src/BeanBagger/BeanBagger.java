@@ -12,6 +12,7 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 import java.util.Set;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -25,7 +26,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  *
@@ -150,49 +152,36 @@ public class BeanBagger {
             }
             System.out.println("");
         
- ///-------------If we get here, we have identified at least one instance matching our criteria   
+ ///-------------If we get here, we have identified at least one instance matching our criteria  
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
- org.json.JSONObject JinfraScan = new org.json.JSONObject();
- org.json.JSONArray JServer = new org.json.JSONArray();
-            
- org.json.JSONObject JVM = new org.json.JSONObject();
- org.json.JSONArray Beans = new org.json.JSONArray();
-                    
+ org.json.JSONObject Jinfrascan = new org.json.JSONObject();//Contains Hosts
+ org.json.JSONArray Hosts = new org.json.JSONArray();
+ org.json.JSONObject Host = new org.json.JSONObject();
+ 
+ org.json.JSONArray JVMs = new org.json.JSONArray();//JVMs on host
+           
 for(VirtualMachineDescriptor avmd: MATCHINGLIST)     
-{
-                    
-                    
+{                
 myJMXconnector = getLocalConnection(VirtualMachine.attach(avmd));// Connects to the process containing our beans
 MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
-
 System.out.println("Number of beans found in " + avmd.displayName()+":" + myJMXConnection.getMBeanCount());
 
 String getDefaultDomain = myJMXConnection.getDefaultDomain();
 String[] getDomains=myJMXConnection.getDomains();
-
-
 Set<ObjectInstance> beans = myJMXConnection.queryMBeans(null, null);
 
-org.json.JSONObject Jinstance = new org.json.JSONObject();
-
-
-
-
+org.json.JSONObject JVM = new org.json.JSONObject();
+org.json.JSONArray JBeans = new org.json.JSONArray();
 for( ObjectInstance instance : beans )
 {
-
     String daclassname = instance.getClassName();
     if(supressSun & (daclassname.startsWith("sun.") | daclassname.startsWith("com.sun."))) continue;
-    
     if(daclassname.contains(TARGETBEAN) || TARGETBEAN.contentEquals("*"))
     {
-    MBeanAttributeInfo[] myAttributeArray = null;   
-    
-    org.json.JSONObject Beanboy = new org.json.JSONObject();
-    org.json.JSONArray BeanieButes = new org.json.JSONArray();
-
-    
-    
+      MBeanAttributeInfo[] myAttributeArray = null;   
+      org.json.JSONObject Beanboy = new org.json.JSONObject();
+      org.json.JSONArray BeanieButes = new org.json.JSONArray();
     try
     {
     MBeanInfo info = myJMXConnection.getMBeanInfo( instance.getObjectName() );
@@ -264,22 +253,33 @@ for( ObjectInstance instance : beans )
        }
            
     }//End processing Bean Attributes, add attributes to bean array.
-    Beanboy.put(daclassname, BeanieButes);
-
+    Beanboy.put(daclassname, BeanieButes);//add attributes to the bean
+    JBeans.put(Beanboy);//add bean to VM
     }//End if this bean was skipped.
-   
- 
+
 }//End of process JVM instance beans
-
-
+JVM.put(avmd.displayName(), JBeans);
+JVMs.put(JVM);
 
 
 }//End JVM iteration
+java.net.InetAddress addr = java.net.InetAddress.getLocalHost();
+String mename = addr.getHostName();
+Host.put(mename, JVMs);
+//add vms to host
+Hosts.put(Host);
+//add server(s) to infra
+String time = String.valueOf(System.currentTimeMillis());
+Jinfrascan.put(time, Hosts);
+
+// OK. How do I dump the JSON?
 
 
 
 
-System.out.println("Stiv's Beanbagger Finished");         
+System.out.println("Stiv's Beanbagger Finished");  
+
+System.out.print(Jinfrascan);
     }
       
 static JMXConnector getLocalConnection(VirtualMachine vm) throws Exception {
