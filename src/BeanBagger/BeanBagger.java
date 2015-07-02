@@ -45,6 +45,7 @@ public class BeanBagger {
         public static boolean notquiet=true;
         public static boolean supressSun=false;
         public static org.json.JSONObject Jason = new org.json.JSONObject();
+        public static String JSONFile = "";
         
     /**
      * @param args the command line arguments
@@ -61,6 +62,10 @@ public class BeanBagger {
                 TargetJVM=args[x+1];
                 x++;
                 break;
+              case "-j":
+                JSONFile=args[x+1];
+                x++;
+                break;
               case "-b":
                 TARGETBEAN=args[x+1];
                 x++;
@@ -75,12 +80,13 @@ public class BeanBagger {
                   ExactMatchRequired=true;
                   break;    
                default:
-                  System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m ");
+                  System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}");
                   System.out.println("-p {process}: VM Process Name or substring to try to connect to:");
                   System.out.println("-b {bean}:  optional, restrict data to just one bean. Default is all beans ");
                   System.out.println("-x  Requires exact match of VM Process Name");
                   System.out.println("-q  Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("-m  Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
+                  System.out.println("-j {filename}:  Output results to filename in JSON format*");
                   System.out.println("\nProcesses found:");  
                     List<VirtualMachineDescriptor> list = VirtualMachine.list();
                   for (VirtualMachineDescriptor vmd: list)
@@ -274,12 +280,14 @@ Jinfrascan.put(time, Hosts);
 
 // OK. How do I dump the JSON?
 
-
-
+if(JSONFile!="")
+{
+System.out.print(Jinfrascan);
+}
 
 System.out.println("Stiv's Beanbagger Finished");  
 
-System.out.print(Jinfrascan);
+
     }
       
 static JMXConnector getLocalConnection(VirtualMachine vm) throws Exception {
