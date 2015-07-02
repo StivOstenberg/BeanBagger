@@ -12,6 +12,7 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 import java.util.Set;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 
@@ -28,6 +29,7 @@ import javax.management.remote.JMXServiceURL;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 
 /**
  *
@@ -46,6 +48,7 @@ public class BeanBagger {
         public static boolean supressSun=false;
         public static org.json.JSONObject Jason = new org.json.JSONObject();
         public static String JSONFile = "";
+        public static boolean outJSON=false;
         
     /**
      * @param args the command line arguments
@@ -59,11 +62,13 @@ public class BeanBagger {
          switch(disarg)
          {
               case "-p":
+                if(x==args.length)Usage();
                 TargetJVM=args[x+1];
                 x++;
                 break;
               case "-j":
-                JSONFile=args[x+1];
+                outJSON=true;
+                if(args.length-1>x)JSONFile=args[x+1];;
                 x++;
                 break;
               case "-b":
@@ -80,29 +85,8 @@ public class BeanBagger {
                   ExactMatchRequired=true;
                   break;    
                default:
-                  System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}");
-                  System.out.println("-p {process}: VM Process Name or substring to try to connect to:");
-                  System.out.println("-b {bean}:  optional, restrict data to just one bean. Default is all beans ");
-                  System.out.println("-x  Requires exact match of VM Process Name");
-                  System.out.println("-q  Filter. Suppresses output of unsupported types or operations.");
-                  System.out.println("-m  Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
-                  System.out.println("-j {filename}:  Output results to filename in JSON format*");
-                  System.out.println("\nProcesses found:");  
-                    List<VirtualMachineDescriptor> list = VirtualMachine.list();
-                  for (VirtualMachineDescriptor vmd: list)
-                    {
-                      if(vmd.displayName().equals(""))
-                        {
-                        System.out.println("   {Unamed Instance}");
-                        }
-                      else
-                        {
-                        System.out.println("   "+ vmd.displayName());   
-                        }
-
-                    }
-                      System.out.println("");
-                      System.exit(1);
+                   Usage();
+                  
                   
          }//End switch
         }
@@ -278,16 +262,60 @@ Hosts.put(Host);
 String time = String.valueOf(System.currentTimeMillis());
 Jinfrascan.put(time, Hosts);
 
-// OK. How do I dump the JSON?
 
+// OK. How do I dump the JSON?
+if(outJSON)
+{
 if(JSONFile!="")
 {
-System.out.print(Jinfrascan);
+try
+{    
+PrintWriter writer = new PrintWriter(JSONFile, "UTF-8");
+writer.println(Jinfrascan);
+writer.close(); 
+}
+catch(Exception ex)
+        {
+        System.out.print("Error processing file!") ;
+        System.out.print(ex);
+        }
+
+
+}
+else{System.out.print(Jinfrascan);}
+    
 }
 
 System.out.println("Stiv's Beanbagger Finished");  
 
 
+    }
+    
+    public static void Usage()
+    {
+      System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}");
+                  System.out.println("-p {process}: VM Process Name or substring to try to connect to:");
+                  System.out.println("-b {bean}:  optional, restrict data to just one bean. Default is all beans ");
+                  System.out.println("-x  Requires exact match of VM Process Name");
+                  System.out.println("-q  Filter. Suppresses output of unsupported types or operations.");
+                  System.out.println("-m  Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
+                  System.out.println("-j {filename}:  Output results to filename in JSON format*");
+                  System.out.println("\nProcesses found:");  
+                    List<VirtualMachineDescriptor> list = VirtualMachine.list();
+                  for (VirtualMachineDescriptor vmd: list)
+                    {
+                      if(vmd.displayName().equals(""))
+                        {
+                        System.out.println("   {Unamed Instance}");
+                        }
+                      else
+                        {
+                        System.out.println("   "+ vmd.displayName());   
+                        }
+
+                    }
+                      System.out.println("");
+                      System.exit(1);  
     }
       
 static JMXConnector getLocalConnection(VirtualMachine vm) throws Exception {
