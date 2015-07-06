@@ -127,6 +127,9 @@ public class BeanBagger {
                       {
                       System.out.println("  Skipping unnamed JVM");    
                       }
+                      else if(DN.contains("BeanBagger")){
+                      System.out.println("  Skipping BeanBagger JVM");  
+                      }
                       else
                       {
                       System.out.println("  Matching JVM instance found: " + DN);
@@ -233,17 +236,17 @@ for( ObjectInstance instance : beans )
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
                 break; 
             default:
-                attvalue = "*-Unsupported: complex type";
+                attvalue = "*-Unsupported: complex type-*";
                 break;  
         }//end switch
         }//end if
         else{
-        attvalue = "*-Not readable!";
+        attvalue = "*-Not readable!-*";
         } 
         }
         catch(Exception ex )
                 {
-                attvalue = "*-Unsupported Operation";
+                attvalue = "*-Exception accessing value-*";
                 }
        boolean dooutput=false;
        if(notquiet)dooutput=true;
@@ -255,7 +258,7 @@ for( ObjectInstance instance : beans )
            }
           catch(Exception ex)//For attributes with no values.
           {
-              attvalue="No value";
+              attvalue="*-No value-*";
               dooutput=true;
           }
                
