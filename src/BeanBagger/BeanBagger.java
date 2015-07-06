@@ -345,7 +345,7 @@ System.out.println("Stiv's Beanbagger Finished");
                   System.out.println("  -x  :Requires exact match of VM Process Name");
                   System.out.println("  -q  :Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("  -m  :Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
-                  System.out.println("  -ppj :  Prettyprint JSON output");
+                  System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not filename." );
                   System.out.println("\nProcesses found:");  
                     List<VirtualMachineDescriptor> list = VirtualMachine.list();
                   for (VirtualMachineDescriptor vmd: list)
