@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+
 import javax.management.*;
 import javax.management.ObjectInstance;
 import javax.management.remote.JMXConnector;
@@ -49,6 +50,7 @@ public class BeanBagger {
         public static org.json.JSONObject Jason = new org.json.JSONObject();
         public static String JSONFile = "";
         public static boolean outJSON=false;
+        public static boolean prettyprint=false;
         
     /**
      * @param args the command line arguments
@@ -66,10 +68,14 @@ public class BeanBagger {
                 TargetJVM=args[x+1];
                 x++;
                 break;
+              case "-ppj"  :
+                 prettyprint=true; 
+                 break; 
               case "-j":
                 outJSON=true;
-                if(args.length-1>x)JSONFile=args[x+1];;
-                x++;
+                if(args.length-1>x && !args[x+1].startsWith("-"))
+                {JSONFile=args[x+1];
+                x++;}
                 break;
               case "-b":
                 TARGETBEAN=args[x+1];
@@ -266,13 +272,17 @@ Jinfrascan.put(time, Hosts);
 // OK. How do I dump the JSON?
 if(outJSON)
 {
-if(JSONFile!="")
+if(!JSONFile.equals(""))
 {
 try
-{    
-PrintWriter writer = new PrintWriter(JSONFile, "UTF-8");
-writer.println(Jinfrascan);
-writer.close(); 
+{  
+ PrintWriter writer = new PrintWriter(JSONFile, "UTF-8");
+ if(prettyprint)writer.println(Jinfrascan.toString(4));
+ else writer.println(Jinfrascan);
+ writer.close();  
+    
+    
+
 }
 catch(Exception ex)
         {
@@ -282,10 +292,15 @@ catch(Exception ex)
 
 
 }
-else{System.out.print(Jinfrascan);}
+else
+{
+    System.out.println("JSON Output:");  
+    if(prettyprint)System.out.print(Jinfrascan.toString(4));
+    else System.out.print(Jinfrascan);
+}
     
 }
-
+System.out.println("");  
 System.out.println("Stiv's Beanbagger Finished");  
 
 
@@ -293,13 +308,15 @@ System.out.println("Stiv's Beanbagger Finished");
     
     public static void Usage()
     {
-      System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}");
+      System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -pp");
                   System.out.println("-p {process}: VM Process Name or substring to try to connect to:");
                   System.out.println("-b {bean}:  optional, restrict data to just one bean. Default is all beans ");
+                  System.out.println("-j {filename}:  Output results to filename in JSON format, or to console if not file specified.");
                   System.out.println("-x  Requires exact match of VM Process Name");
                   System.out.println("-q  Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("-m  Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
-                  System.out.println("-j {filename}:  Output results to filename in JSON format*");
+
+                  System.out.println("-ppj :  Prettyprint JSON output");
                   System.out.println("\nProcesses found:");  
                     List<VirtualMachineDescriptor> list = VirtualMachine.list();
                   for (VirtualMachineDescriptor vmd: list)
