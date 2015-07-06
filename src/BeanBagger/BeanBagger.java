@@ -203,12 +203,16 @@ for( ObjectInstance instance : beans )
        String myname = "";
        String mytype = "";
        String mydesc = "";
+       boolean myread=false;
+       
        try{
         myname = thisAttributeInfo.getName();
         mydesc = thisAttributeInfo.getDescription();
         mytype = thisAttributeInfo.getType();
+        myread = thisAttributeInfo.isReadable();
 
-
+        if(myread)
+        {
         switch (mytype) {
             case "String":
                 attvalue = (String)myJMXConnection.getAttribute(instance.getObjectName(), myname );
@@ -229,21 +233,24 @@ for( ObjectInstance instance : beans )
                 attvalue = myJMXConnection.getAttribute(instance.getObjectName(), myname ).toString();
                 break; 
             default:
-                attvalue = "Unsupported type";
+                attvalue = "*-Unsupported: complex type";
                 break;  
-        }
-      
+        }//end switch
+        }//end if
+        else{
+        attvalue = "*-Not readable!";
         } 
+        }
         catch(Exception ex )
                 {
-                attvalue = "Unsupported Operation";
+                attvalue = "*-Unsupported Operation";
                 }
        boolean dooutput=false;
        if(notquiet)dooutput=true;
        else
            try 
            {
-               if(!attvalue.startsWith("Unsupported"))
+               if(!attvalue.startsWith("*-"))
                 dooutput=true; 
            }
           catch(Exception ex)//For attributes with no values.
@@ -259,7 +266,7 @@ for( ObjectInstance instance : beans )
            AtDatas.put("Name", myname);
            AtDatas.put("Type", mytype);
            AtDatas.put("Value", attvalue);
-           AtDatas.put("Description", mydesc);
+           AtDatas.put("Desc", mydesc);
            BeanieButes.put(AtDatas);
            
        }
@@ -296,17 +303,12 @@ try
  if(prettyprint)writer.println(Jinfrascan.toString(4));
  else writer.println(Jinfrascan);
  writer.close();  
-    
-    
-
 }
 catch(Exception ex)
         {
         System.out.print("Error processing file!") ;
         System.out.print(ex);
         }
-
-
 }
 else
 {
