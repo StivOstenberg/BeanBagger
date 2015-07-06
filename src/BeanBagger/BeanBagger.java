@@ -324,10 +324,10 @@ System.out.println("Stiv's Beanbagger Finished");
     
     public static void Usage()
     {
-      System.out.println("Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -ppj");
+      System.out.println("java -jar Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -ppj");
                   System.out.println("  -p {process}: Optional, VM Process Name or substring of process to try to connect to. Defaults to all");
                   System.out.println("  -b {bean}:  Optional, restrict data to just one bean. Default is all beans ");
-                  System.out.println("  -j {filename}:  Optional: Output results to filename in JSON format, or to console if not file specified.");
+                  System.out.println("  -j {optionalfilename}:  Optional: Output results to filename in JSON format, or to console if no file specified.");
                   System.out.println("  -x  :Requires exact match of VM Process Name");
                   System.out.println("  -q  :Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("  -m  :Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
