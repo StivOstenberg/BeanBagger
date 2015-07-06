@@ -207,13 +207,14 @@ for( ObjectInstance instance : beans )
        String mytype = "";
        String mydesc = "";
        boolean myread=false;
+       boolean mywrite=false;
        
        try{
         myname = thisAttributeInfo.getName();
         mydesc = thisAttributeInfo.getDescription();
         mytype = thisAttributeInfo.getType();
         myread = thisAttributeInfo.isReadable();
-
+        mywrite = thisAttributeInfo.isWritable();
         if(myread)
         {
         switch (mytype) {
@@ -264,12 +265,20 @@ for( ObjectInstance instance : beans )
                
        if(dooutput)
        {
-           System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue);
+           
            org.json.JSONObject AtDatas = new org.json.JSONObject();// Create the list of attributes and values into an object.
            AtDatas.put("Name", myname);
            AtDatas.put("Type", mytype);
-           AtDatas.put("Value", attvalue);
+           if(myread){
+               AtDatas.put("Value", attvalue);
+               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue + " Writeable:"+mywrite);
+           }
+           else{
+               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Readable:"  + myread + " Writeable:"+mywrite);
+               AtDatas.put("Readable",myread);
+           }
            AtDatas.put("Desc", mydesc);
+           if(mywrite)AtDatas.put("Writable", mywrite);
            BeanieButes.put(AtDatas);
            
        }
