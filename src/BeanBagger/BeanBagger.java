@@ -242,7 +242,7 @@ for( ObjectInstance instance : beans )
         }//end switch
         }//end if
         else{
-        attvalue = "*-Not readable!-*";
+        attvalue = "";
         } 
         }
         catch(Exception ex )
@@ -271,10 +271,10 @@ for( ObjectInstance instance : beans )
            AtDatas.put("Type", mytype);
            if(myread){
                AtDatas.put("Value", attvalue);
-               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue + " Writeable:"+mywrite);
+               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:"  + attvalue + "  Writeable:"+mywrite);
            }
            else{
-               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Readable:"  + myread + " Writeable:"+mywrite);
+               System.out.println("    Name:" + myname + "  Type:" + mytype + "  Readable:"  + myread + "  Writeable:"+mywrite);
                AtDatas.put("Readable",myread);
            }
            AtDatas.put("Desc", mydesc);
