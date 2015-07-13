@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -39,25 +40,34 @@ import java.net.UnknownHostException;
 public class BeanBagger {
         
 	private static final String CONNECTOR_ADDRESS_PROPERTY = "com.sun.management.jmxremote.localConnectorAddress";
-        public static  String  TargetJVM = "";
-        public static String TARGETBEAN = "";
         public static VirtualMachineDescriptor TARGETDESCRIPTOR ;
         static JMXConnector myJMXconnector = null;
+        
+        
+        //replace these with MBean
+        public static  String  TargetJVM = "";
+        public static String TARGETBEAN = "";
+
         public static boolean ExactMatchRequired = false; // ALlows matching TargetVM process based on substring
         public static String OUTFILE = "//tmp//output.yml";
-        public static boolean notquiet=true;
+        public static boolean suppresscomplex=true;
+        public static boolean ignoreunreadable=false;
         public static boolean supressSun=false;
-        public static org.json.JSONObject Jason = new org.json.JSONObject();
-        public static String JSONFile = "";
-        public static boolean outJSON=false;
+        public static String JSONFile = "";//The file we will output to.
+        public static boolean outJSON=false;//Turn on JSON output
         public static boolean prettyprint=false;
         
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        
-        
+                //Get the MBean server
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        //register the MBean
+        BBConfig mBean = new BBConfig();
+        ObjectName name = new ObjectName("com.stiv.jmx:type=SystemConfig");
+        mbs.registerMBean(mBean, name);
+
         for(int x =0;x<args.length;x++)
         {
          String disarg = args[x];
@@ -87,8 +97,11 @@ public class BeanBagger {
                     x++;
                 }
                 break;
+                case "-r":
+                  ignoreunreadable=true;
+                  break;
               case "-q":
-                  notquiet=false;
+                  suppresscomplex=false;
                   break;
                case "-m":
                   supressSun=true;
@@ -127,7 +140,7 @@ public class BeanBagger {
                       {
                       System.out.println("  Skipping unnamed JVM");    
                       }
-                      else if(DN.contains("BeanBagger")){
+                      else if(!TargetJVM.startsWith("BeanBagger")  && DN.contains("BeanBagger")){
                       System.out.println("  Skipping BeanBagger JVM");  
                       }
                       else
@@ -160,6 +173,9 @@ public class BeanBagger {
  ///-------------If we get here, we have identified at least one instance matching our criteria  
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+            
+            
+            
  org.json.JSONObject Jinfrascan = new org.json.JSONObject();//Contains Hosts
  org.json.JSONArray Hosts = new org.json.JSONArray();
  org.json.JSONObject Host = new org.json.JSONObject();
@@ -249,20 +265,24 @@ for( ObjectInstance instance : beans )
                 {
                 attvalue = "*-Exception accessing value-*";
                 }
+       
+       //THis section is where we determine if we are going to record the value or not.
        boolean dooutput=false;
-       if(notquiet)dooutput=true;
+       
+       
+       if(suppresscomplex)dooutput=true;
        else
            try 
            {
-               if(!attvalue.startsWith("*-"))
-                dooutput=true; 
+               if(!attvalue.startsWith("*-") ) dooutput=true; 
            }
           catch(Exception ex)//For attributes with no values.
           {
               attvalue="*-No value-*";
               dooutput=true;
           }
-               
+       if(ignoreunreadable && !myread)   dooutput=false;    
+       
        if(dooutput)
        {
            
@@ -345,9 +365,11 @@ System.out.println("Stiv's Beanbagger Finished");
                   System.out.println("  -x  :Requires exact match of VM Process Name");
                   System.out.println("  -q  :Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("  -m  :Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
-                  System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not filename." );
+                  System.out.println("  -r  :Filter. Suppresses logging of unreadable attributes");
+                  System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not j- filename." );
+                  
                   System.out.println("\nProcesses found:");  
-                    List<VirtualMachineDescriptor> list = VirtualMachine.list();
+                  List<VirtualMachineDescriptor> list = VirtualMachine.list();
                   for (VirtualMachineDescriptor vmd: list)
                     {
                       if(vmd.displayName().equals(""))
