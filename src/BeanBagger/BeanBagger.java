@@ -471,9 +471,10 @@ System.out.println("Stiv's Beanbagger Finished");
     public static void Usage()
     {
       System.out.println("java -jar Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -ppj");
-                  System.out.println("  -p {process}: Optional, VM Process Name or substring of process to try to connect to. Defaults to all");
-                  System.out.println("  -b {bean}:  Optional , restrict data to just one bean. Default is all beans ");
-                  System.out.println("  -j {optionalfilename}:  Optional: Output results to filename in JSON format, or to console if no file specified.");
+                  System.out.println("  -p {process}: VM Process Name or substring of process to try to connect to. Defaults to all");
+                  System.out.println("  -b {bean}:  Restrict data to just one bean. Default is all beans ");
+                  System.out.println("  -j {optionalfilename}:  Output results to single file in JSON format, or to console if no file specified.");
+                  System.out.println("                        File will be overwritten each pass.");
                   System.out.println("  -x  :Requires exact match of VM Process Name");
                   System.out.println("  -q  :Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("  -m  :Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
@@ -482,7 +483,7 @@ System.out.println("Stiv's Beanbagger Finished");
                   System.out.println("  -c  {iterations} :Count number of times to run. -c with no options sets to 5. Automatically sets -l");
                   
                   System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not j- filename." );
-                  System.out.println("  -log {logdir} :  Write each pass to a file in logdir." );
+                  System.out.println("  -log {logdir} :  Write each pass to a new file in logdir with epoch time in the filename." );
 
                   
                   System.out.println("\nProcesses found:");  
