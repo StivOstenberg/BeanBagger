@@ -139,7 +139,7 @@ public class BeanBagger {
                     }
                     // Write a readme file to the directory as a test
                     try{
-                        String rmf = mBean.getLogDir() + "\\BeanBaggerreadme.txt";
+                        String rmf = mBean.getLogDir() + "/BeanBaggerreadme.txt";
                         try (PrintWriter out = new PrintWriter(rmf)) {
                             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                             Date date = new Date();
@@ -415,7 +415,7 @@ public class BeanBagger {
                 }
                 if(mBean.getDoLogging())
                     {
-                       String rmf = mBean.getLogDir() + "\\BeanBagger" + time + ".txt";
+                       String rmf = mBean.getLogDir() + "/BeanBagger" + time + ".txt";
                        PrintWriter writer = new PrintWriter(rmf, "UTF-8");
                        if (mBean.getprettyprint()) {
                             writer.println(Jinfrascan.toString(4));
@@ -453,10 +453,9 @@ public class BeanBagger {
         
         
         if(loopagain){
-            mBean.setIterationsCount(mBean.getIterationsCount() + 1);
             System.out.println("Sleeping " + mBean.getLoopDelaySeconds() + " seconds. This was run " + mBean.getIterationsCount());
+            mBean.setIterationsCount(mBean.getIterationsCount() + 1);
             TimeUnit.SECONDS.sleep(mBean.getLoopDelaySeconds());
-
         }
         } while (loopagain);
 
