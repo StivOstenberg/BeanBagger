@@ -224,7 +224,7 @@ public class BeanBagger {
                         if (DN.contains(mBean.getTargetJVM()) || mBean.getTargetJVM().equalsIgnoreCase("*")) {
                             if (DN.equals("")) {
                                 System.out.println("  Skipping unnamed JVM");                                
-                            } //else if(!TargetJVM.startsWith("BeanBagger")  && DN.contains("BeanBagger")){ System.out.println("  Skipping BeanBagger JVM");  }
+                            } else if(!mBean.getTargetJVM().startsWith("BeanBagger")  && DN.contains("BeanBagger")){ System.out.println("  Skipping BeanBagger JVM");  }
                             else {
                                 System.out.println("  Matching JVM instance found: " + DN);
                                 TARGETDESCRIPTOR = vmd;
