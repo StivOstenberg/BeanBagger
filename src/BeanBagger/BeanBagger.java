@@ -8,9 +8,11 @@ package BeanBagger;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import java.io.BufferedWriter;
 
 import java.util.Set;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -31,6 +33,9 @@ import javax.management.remote.JMXServiceURL;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 
@@ -84,7 +89,6 @@ public class BeanBagger {
                  mBean.setprettyprint(true);
                  break; 
               case "-j":
-
                 mBean.setoutJSON(true);
                 if(args.length-1>x && !args[x+1].startsWith("-"))//If next item on line exists and is not an option
                 {
@@ -110,7 +114,50 @@ public class BeanBagger {
                   break;
                case "-x":
                    mBean.setExactMatchRequired(true);
-                  break;  
+                  break; 
+               case "-log": 
+ 
+                if(args.length-1>x && !args[x+1].startsWith("-"))//If next item on line exists and is not an option
+                {
+                    mBean.setLogDir(args[x+1]);
+                    try
+                    {
+                      File theDir = new File(mBean.getLogDir());
+ 
+                      // if the directory does not exist, create it
+                     if (!theDir.exists())
+                       {
+                         System.out.println("creating directory: " + mBean.getLogDir());
+                          theDir.mkdir();
+                       }
+
+                    }
+                    catch(Exception ex)
+                    {
+                       System.out.println("Error creating directory: " + mBean.getLogDir()); 
+                       System.exit(1);
+                    }
+                    // Write a readme file to the directory as a test
+                    try{
+                        String rmf = mBean.getLogDir() + "\\BeanBaggerreadme.txt";
+                        try (PrintWriter out = new PrintWriter(rmf)) {
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            Date date = new Date();
+                            out.println("Beanbagger started "  + dateFormat.format(date) );
+                            
+                            //consider adding options outlining the arguments started with.
+                            
+                            
+                            out.close();
+                        }
+                    }
+                    catch(Exception ex){
+                      System.out.println("Error creating files in: " + mBean.getLogDir());  
+                    }
+
+                    x++;
+                }
+                break;    
                case "-l":
                    mBean.setLoop(true);
                    if(args.length-1>x && !args[x+1].startsWith("-"))
@@ -141,6 +188,8 @@ public class BeanBagger {
                 }
                    else{mBean.setIterations(5);}
                   break; 
+
+
                default:
                    Usage();
                 
@@ -362,30 +411,50 @@ public class BeanBagger {
                             System.out.print(Jinfrascan);
                         }
                     }
-                    
+ 
                 }
+                if(mBean.getDoLogging())
+                    {
+                       String rmf = mBean.getLogDir() + "\\BeanBagger" + time + ".txt";
+                       PrintWriter writer = new PrintWriter(rmf, "UTF-8");
+                       if (mBean.getprettyprint()) {
+                            writer.println(Jinfrascan.toString(4));
+                            } 
+                       else {
+                            writer.println(Jinfrascan);
+                            }  
+                       writer.close();   
+                    }
                 
             } catch (Exception exception) {
                 
               //Error handling to come.  
             }
-         
-            loopagain=false;
+
+        
+            
+            
+            
+            
+        loopagain=false;
             
         if(mBean.getLoop())loopagain=true;
-        if( mBean.getIterations()>0 &&  mBean.getIterationsCount() < mBean.getIterations()){
+        
+        if( mBean.getIterations()>0 &&  mBean.getIterationsCount() < mBean.getIterations()){//If we are counting and havent reached limit
             loopagain=true;
-            
+        }
+        if( mBean.getIterations()>0 &&  mBean.getIterationsCount() >= mBean.getIterations()){//If we are counting and havent reached limit
+            loopagain=false;
         }
           
         
         
-        if(!mBean.getLoop())loopagain=false;   
+        if(!mBean.getLoop())loopagain=false;   //If mBean says stop looping, stop it!
         
         
         if(loopagain){
             mBean.setIterationsCount(mBean.getIterationsCount() + 1);
-            System.out.print("Sleeping " + mBean.getLoopDelaySeconds() + " seconds. This was run " + mBean.getIterationsCount());
+            System.out.println("Sleeping " + mBean.getLoopDelaySeconds() + " seconds. This was run " + mBean.getIterationsCount());
             TimeUnit.SECONDS.sleep(mBean.getLoopDelaySeconds());
 
         }
@@ -413,6 +482,7 @@ System.out.println("Stiv's Beanbagger Finished");
                   System.out.println("  -c  {iterations} :Count number of times to run. -c with no options sets to 5. Automatically sets -l");
                   
                   System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not j- filename." );
+                  System.out.println("  -log {logdir} :  Write each pass to a file in logdir." );
 
                   
                   System.out.println("\nProcesses found:");  
