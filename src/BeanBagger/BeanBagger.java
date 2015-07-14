@@ -401,7 +401,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
 //add server(s) to infra
                 String time = String.valueOf(System.currentTimeMillis());
                 Jinfrascan.put(time, Hosts);
-
+                mBean.setLastJSON(Jinfrascan.toString());
 // OK. How do I dump the JSON?
 
                     if (!mBean.getJSONFile().equals("")) {
