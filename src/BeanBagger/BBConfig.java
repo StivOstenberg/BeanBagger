@@ -16,9 +16,10 @@ public class BBConfig implements BBConfigMBean {
      private static boolean ExactMatchRequired = false; // ALlows matching TargetVM process based on substring
      private static boolean DoLogging=false;
      public static String LogDir = "//tmp//";//Name of directory for logs to output to.
-     public static boolean suppresscomplex=true;//Dont bother reporting on complex types we cannot dump as text
+     public static boolean suppresscomplex=false;//Dont bother reporting on complex types we cannot dump as text
      public static boolean ignoreunreadable=false;//Set to pass over beans with unreadable attributes (set only)
      public static boolean supressSun=false;//Suppress the default Sun counters
+     public static boolean consoleout=true;//Do we spit out data to console?
      public static String JSONFile = "";//The file we will output to.
      public static boolean outJSON=false;//Turn on JSON output
      public static  String  TargetJVM = "";//The target JVM
@@ -72,13 +73,17 @@ public class BBConfig implements BBConfigMBean {
      public void setsuppresscomplex(boolean in){suppresscomplex=in;}
      @Override
     public boolean getsuppresscomplex(){return suppresscomplex;}
-         @Override
+      @Override
      public void setLoop(boolean in){Loop=in;}
      @Override
      public void StopLoop(){Loop=false;}
      @Override
     public boolean getLoop(){return Loop;}
-    
+     @Override
+    public void setconsoleout(boolean in){consoleout=in;}
+    @Override
+    public boolean getconsoleout(){return consoleout;}   
+
     
     
     
