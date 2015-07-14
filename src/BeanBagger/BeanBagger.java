@@ -403,7 +403,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                 Jinfrascan.put(time, Hosts);
 
 // OK. How do I dump the JSON?
-                    System.out.println("JSON Output:" + mBean.getoutJSON()); ////////////////////////////////////////////////////////////////////Delete
+
                     if (!mBean.getJSONFile().equals("")) {
                         try {                            
                             PrintWriter writer = new PrintWriter(mBean.getJSONFile(), "UTF-8");
