@@ -286,7 +286,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                             try {
                                 MBeanInfo info = myJMXConnection.getMBeanInfo(instance.getObjectName());
                                 myAttributeArray = info.getAttributes();                                
-                                if(mBean.getconsoleout())System.out.println("     Processing me a bean: "  +ANSI_GREEN+BeanName+ANSI_RESET);
+                                if(mBean.getconsoleout())System.out.println("     Processing bean: "  +ANSI_GREEN+BeanName+ANSI_RESET);
                             } catch (UnsupportedOperationException | RuntimeMBeanException | IllegalStateException ex) {
                                 if(mBean.getconsoleout())System.out.println("     Error processing bean: " + BeanName);                                
                             }
