@@ -38,6 +38,9 @@ public interface BBConfigMBean {
             public void setprettyprint(boolean prettyprint);
             public boolean getprettyprint();
             
+            public void setconsoleout(boolean consoleout);
+            public boolean getconsoleout();
+            
             public void setTargetJVM(String TargetJVM);
             public String getTargetJVM();
     

@@ -36,6 +36,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 
@@ -70,7 +71,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         //register the MBean
         BBConfig mBean = new BBConfig();
-        ObjectName name = new ObjectName("com.stiv.jmx:type=SystemConfig");
+        ObjectName name = new ObjectName("com.stiv.jmx:type=BBConfig");
         mbs.registerMBean(mBean, name);
 
         for(int x =0;x<args.length;x++)
@@ -260,7 +261,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                 for (VirtualMachineDescriptor avmd : MATCHINGLIST) {                    
                     myJMXconnector = getLocalConnection(VirtualMachine.attach(avmd));// Connects to the process containing our beans
                     MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
-                    if(mBean.getconsoleout())System.out.println("Number of beans found in " + avmd.displayName() + ":" + myJMXConnection.getMBeanCount());
+                    if(mBean.getconsoleout())System.out.println("Number of beans found in " +ANSI_GREEN+ avmd.displayName() + ANSI_RESET+ ":  " + myJMXConnection.getMBeanCount());
                     
                     String getDefaultDomain = myJMXConnection.getDefaultDomain();
                     String[] getDomains = myJMXConnection.getDomains();
@@ -270,6 +271,11 @@ public static final String ANSI_WHITE = "\u001B[37m";
                     org.json.JSONArray JBeans = new org.json.JSONArray();
                     for (ObjectInstance instance : beans) {
                         String daclassname = instance.getClassName();
+                        ObjectName oname = instance.getObjectName();
+                        String BeanName = oname.getCanonicalName();
+                        Hashtable<String,String> harry =  oname.getKeyPropertyList();
+                        
+                        
                         if (mBean.getsupressSun() & (daclassname.startsWith("sun.") | daclassname.startsWith("com.sun."))) {
                             continue;
                         }
@@ -280,9 +286,9 @@ public static final String ANSI_WHITE = "\u001B[37m";
                             try {
                                 MBeanInfo info = myJMXConnection.getMBeanInfo(instance.getObjectName());
                                 myAttributeArray = info.getAttributes();                                
-                                if(mBean.getconsoleout())System.out.println("  Processing me a bean: " + daclassname);
+                                if(mBean.getconsoleout())System.out.println("  Processing me a bean: "  +ANSI_GREEN+BeanName+ANSI_RESET);
                             } catch (UnsupportedOperationException | RuntimeMBeanException | IllegalStateException ex) {
-                                if(mBean.getconsoleout())System.out.println("  Error processing bean: " + daclassname);                                
+                                if(mBean.getconsoleout())System.out.println("  Error processing bean: " + BeanName);                                
                             }
                             
                             for (MBeanAttributeInfo thisAttributeInfo : myAttributeArray) {
@@ -378,7 +384,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                 }
                                 
                             }//End processing Bean Attributes, add attributes to bean array.
-                            Beanboy.put(daclassname, BeanieButes);//add attributes to the bean
+                            Beanboy.put(BeanName, BeanieButes);//add attributes to the bean
                             JBeans.put(Beanboy);//add bean to VM
                         }//End if this bean was skipped.
 
