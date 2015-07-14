@@ -480,6 +480,7 @@ System.out.println("Stiv's Beanbagger Finished: " + mBean.getIterationsCount() +
                   System.out.println("  -r  :Filter. Suppresses logging of unreadable attributes");
                   System.out.println("  -l  {seconds} :Loop continously.   After completion, the dump will rerun in x seconds, default is 30");
                   System.out.println("  -c  {iterations} :Count number of times to run. -c with no options sets to 5. Automatically sets -l");
+                  System.out.println("  -q  :Quiet.  Suppresses most console output.");
                   
                   System.out.println("  -ppj :  Prettyprint JSON output" );
                   System.out.println("  -log {logdir} :  Write each pass to a new file in logdir with epoch time in the filename." );
