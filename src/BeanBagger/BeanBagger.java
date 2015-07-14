@@ -358,11 +358,11 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                 }                                
                                 
                                 if (dooutput) {
-                                    
                                     org.json.JSONObject AtDatas = new org.json.JSONObject();// Create the list of attributes and values into an object.
                                     AtDatas.put("Name", myname);
                                     AtDatas.put("Type", mytype);
                                     String attvaluecolor="";
+                                    if(attvalue == null)attvalue="*-NULL-*";
                                     if(attvalue.startsWith("*-")){
                                         attvaluecolor=ANSI_RED+attvalue+ANSI_RESET;}
                                     else attvaluecolor=attvalue;
@@ -403,7 +403,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                 Jinfrascan.put(time, Hosts);
 
 // OK. How do I dump the JSON?
-                if (mBean.getoutJSON()) {
+                    System.out.println("JSON Output:" + mBean.getoutJSON()); ////////////////////////////////////////////////////////////////////Delete
                     if (!mBean.getJSONFile().equals("")) {
                         try {                            
                             PrintWriter writer = new PrintWriter(mBean.getJSONFile(), "UTF-8");
@@ -417,7 +417,9 @@ public static final String ANSI_WHITE = "\u001B[37m";
                             System.out.print("Error processing file!");
                             System.out.print(ex);
                         }
-                    } else {
+                    } 
+
+                    if(mBean.getoutJSON()){
                         System.out.println("JSON Output:");                        
                         if (mBean.getprettyprint()) {
                             System.out.print(Jinfrascan.toString(4));
@@ -425,8 +427,9 @@ public static final String ANSI_WHITE = "\u001B[37m";
                             System.out.print(Jinfrascan);
                         }
                     }
+
  
-                }
+
                 if(mBean.getDoLogging())
                     {
                        String rmf = mBean.getLogDir() + "/BeanBagger" + time + ".txt";
@@ -441,7 +444,8 @@ public static final String ANSI_WHITE = "\u001B[37m";
                     }
                 
             } catch (Exception exception) {
-                
+            System.out.println("Error:" + exception); 
+            System.out.println("      " + exception);
               //Error handling to come.  
             }
 
@@ -493,7 +497,7 @@ System.out.println("Stiv's Beanbagger Finished: " + mBean.getIterationsCount() +
     
     public static void Usage()
     {
-      System.out.println("java -jar Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -ppj");
+      System.out.println("java -jar Beanbagger [-p {process}] [-b {bean}] -q -m [-j {filename}] -pp -q");
                   System.out.println("  -p {process}: VM Process Name or substring of process to try to connect to. Defaults to all");
                   System.out.println("  -b {bean}:  Restrict data to just one bean. Default is all beans ");
                   System.out.println("  -j {optionalfilename}:  Output results to single file in JSON format, or to console if no file specified.");
