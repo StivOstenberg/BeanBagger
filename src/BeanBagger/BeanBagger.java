@@ -261,7 +261,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                 for (VirtualMachineDescriptor avmd : MATCHINGLIST) {                    
                     myJMXconnector = getLocalConnection(VirtualMachine.attach(avmd));// Connects to the process containing our beans
                     MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
-                    if(mBean.getconsoleout())System.out.println("Number of beans found in " +ANSI_GREEN+ avmd.displayName() + ANSI_RESET+ ":  " + myJMXConnection.getMBeanCount());
+                    if(mBean.getconsoleout())System.out.println("Number of beans found in " +ANSI_CYAN+ avmd.displayName() + ANSI_RESET+ ":  " + myJMXConnection.getMBeanCount());
                     
                     String getDefaultDomain = myJMXConnection.getDefaultDomain();
                     String[] getDomains = myJMXConnection.getDomains();
@@ -286,9 +286,9 @@ public static final String ANSI_WHITE = "\u001B[37m";
                             try {
                                 MBeanInfo info = myJMXConnection.getMBeanInfo(instance.getObjectName());
                                 myAttributeArray = info.getAttributes();                                
-                                if(mBean.getconsoleout())System.out.println("  Processing me a bean: "  +ANSI_GREEN+BeanName+ANSI_RESET);
+                                if(mBean.getconsoleout())System.out.println("     Processing me a bean: "  +ANSI_GREEN+BeanName+ANSI_RESET);
                             } catch (UnsupportedOperationException | RuntimeMBeanException | IllegalStateException ex) {
-                                if(mBean.getconsoleout())System.out.println("  Error processing bean: " + BeanName);                                
+                                if(mBean.getconsoleout())System.out.println("     Error processing bean: " + BeanName);                                
                             }
                             
                             for (MBeanAttributeInfo thisAttributeInfo : myAttributeArray) {
@@ -350,7 +350,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                     } catch (Exception ex)//For attributes with no values.
                                     {
                                         attvalue = "*-Unavailable-*";
-                                        dooutput = true;
+                                        if (!mBean.getsuppresscomplex())dooutput = true;
                                     }
                                 }
                                 if (mBean.getignoreunreadable() && !myread) {
@@ -370,9 +370,9 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                         attvaluecolor=ANSI_YELLOW+"\"\""+ANSI_RESET;}
                                     if (myread) {
                                         AtDatas.put("Value", attvalue);
-                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype +  "  Writeable:" + mywrite + "  Readable:" + myread + "  Value:" + attvaluecolor );
+                                        if(mBean.getconsoleout())System.out.println("       Name:" + myname + "  Type:" + mytype +  "  Writeable:" + mywrite + "  Readable:" + myread + "  Value:" + attvaluecolor );
                                     } else {
-                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype + "  Writeable:" + mywrite+ "  Readable:" + myread );
+                                        if(mBean.getconsoleout())System.out.println("       Name:" + myname + "  Type:" + mytype + "  Writeable:" + mywrite+ "  Readable:" + myread );
                                         AtDatas.put("Readable", myread);
                                     }
                                     AtDatas.put("Desc", mydesc);
