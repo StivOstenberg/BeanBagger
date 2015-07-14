@@ -50,19 +50,6 @@ public class BeanBagger {
         static JMXConnector myJMXconnector = null;
         
         
-        //replace these with MBean
-       // public static  String  TargetJVM = "";
-        //public static String TARGETBEAN = "";
-
-       // public static boolean ExactMatchRequired = false; // ALlows matching TargetVM process based on substring
-       // public static String OUTFILE = "//tmp//output.yml";
-       // public static boolean suppresscomplex=true;
-       // public static boolean ignoreunreadable=false;
-       // public static boolean supressSun=false;
-       // public static String JSONFile = "";//The file we will output to.
-       // public static boolean outJSON=false;//Turn on JSON output
-       // public static boolean prettyprint=false;
-        
     /**
      * @param args the command line arguments
      */
@@ -85,7 +72,6 @@ public class BeanBagger {
                 x++;
                 break;
               case "-ppj"  :
-                 mBean.setoutJSON(true);
                  mBean.setprettyprint(true);
                  break; 
               case "-j":
@@ -106,7 +92,10 @@ public class BeanBagger {
                 case "-r":
                   mBean.setignoreunreadable(true);
                   break;
-              case "-q":
+                case "-q":
+                  mBean.setconsoleout(false);
+                  break;
+              case "-u":
                   mBean.setsuppresscomplex(false);
                   break;
                case "-m":
@@ -127,7 +116,7 @@ public class BeanBagger {
                       // if the directory does not exist, create it
                      if (!theDir.exists())
                        {
-                         System.out.println("creating directory: " + mBean.getLogDir());
+                         if(mBean.getconsoleout())System.out.println("creating directory: " + mBean.getLogDir());
                           theDir.mkdir();
                        }
 
@@ -214,7 +203,7 @@ public class BeanBagger {
                 Boolean gotit = false;
                 String listofjvs = "";
                 
-                System.out.println("Searching for matching VM instances");
+                if(mBean.getconsoleout())System.out.println("Searching for matching VM instances");
                 for (VirtualMachineDescriptor vmd : list) {
                     
                     String desc = vmd.toString();
@@ -223,10 +212,11 @@ public class BeanBagger {
                         String DN = vmd.displayName();
                         if (DN.contains(mBean.getTargetJVM()) || mBean.getTargetJVM().equalsIgnoreCase("*")) {
                             if (DN.equals("")) {
-                                System.out.println("  Skipping unnamed JVM");                                
-                            } else if(!mBean.getTargetJVM().startsWith("BeanBagger")  && DN.contains("BeanBagger")){ System.out.println("  Skipping BeanBagger JVM");  }
+                                if(mBean.getconsoleout())System.out.println("  Skipping unnamed JVM");                                
+                            } else if(!mBean.getTargetJVM().startsWith("BeanBagger")  && DN.contains("BeanBagger")){
+                                if(mBean.getconsoleout())System.out.println("  Skipping BeanBagger JVM");  }
                             else {
-                                System.out.println("  Matching JVM instance found: " + DN);
+                                if(mBean.getconsoleout())System.out.println("  Matching JVM instance found: " + DN);
                                 TARGETDESCRIPTOR = vmd;
                                 gotit = true;
                                 MATCHINGLIST.add(vmd);
@@ -258,7 +248,7 @@ public class BeanBagger {
                 for (VirtualMachineDescriptor avmd : MATCHINGLIST) {                    
                     myJMXconnector = getLocalConnection(VirtualMachine.attach(avmd));// Connects to the process containing our beans
                     MBeanServerConnection myJMXConnection = myJMXconnector.getMBeanServerConnection(); //Connects to the MBean server for that process.
-                    System.out.println("Number of beans found in " + avmd.displayName() + ":" + myJMXConnection.getMBeanCount());
+                    if(mBean.getconsoleout())System.out.println("Number of beans found in " + avmd.displayName() + ":" + myJMXConnection.getMBeanCount());
                     
                     String getDefaultDomain = myJMXConnection.getDefaultDomain();
                     String[] getDomains = myJMXConnection.getDomains();
@@ -278,9 +268,9 @@ public class BeanBagger {
                             try {
                                 MBeanInfo info = myJMXConnection.getMBeanInfo(instance.getObjectName());
                                 myAttributeArray = info.getAttributes();                                
-                                System.out.println("  Processing me a bean: " + daclassname);
+                                if(mBean.getconsoleout())System.out.println("  Processing me a bean: " + daclassname);
                             } catch (UnsupportedOperationException | RuntimeMBeanException | IllegalStateException ex) {
-                                System.out.println("  Error processing bean: " + daclassname);                                
+                                if(mBean.getconsoleout())System.out.println("  Error processing bean: " + daclassname);                                
                             }
                             
                             for (MBeanAttributeInfo thisAttributeInfo : myAttributeArray) {
@@ -332,7 +322,7 @@ public class BeanBagger {
                                 //THis section is where we determine if we are going to record the value or not.
                                 boolean dooutput = false;
                                 
-                                if (mBean.getsuppresscomplex()) {
+                                if (!mBean.getsuppresscomplex()) {
                                     dooutput = true;
                                 } else {
                                     try {
@@ -356,9 +346,9 @@ public class BeanBagger {
                                     AtDatas.put("Type", mytype);
                                     if (myread) {
                                         AtDatas.put("Value", attvalue);
-                                        System.out.println("    Name:" + myname + "  Type:" + mytype + "  Value:" + attvalue + "  Writeable:" + mywrite);
+                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype +  "  Writeable:" + mywrite + "  Readable:" + myread + "  Value:" + attvalue );
                                     } else {
-                                        System.out.println("    Name:" + myname + "  Type:" + mytype + "  Readable:" + myread + "  Writeable:" + mywrite);
+                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype + "  Writeable:" + mywrite+ "  Readable:" + myread );
                                         AtDatas.put("Readable", myread);
                                     }
                                     AtDatas.put("Desc", mydesc);
@@ -437,7 +427,7 @@ public class BeanBagger {
             
             
         loopagain=false;
-            
+        mBean.setIterationsCount(mBean.getIterationsCount() + 1);    
         if(mBean.getLoop())loopagain=true;
         
         if( mBean.getIterations()>0 &&  mBean.getIterationsCount() < mBean.getIterations()){//If we are counting and havent reached limit
@@ -454,15 +444,25 @@ public class BeanBagger {
         
         if(loopagain){
             System.out.println("Sleeping " + mBean.getLoopDelaySeconds() + " seconds. This was run " + mBean.getIterationsCount());
-            mBean.setIterationsCount(mBean.getIterationsCount() + 1);
-            TimeUnit.SECONDS.sleep(mBean.getLoopDelaySeconds());
+            
+            for(int x=0; x<mBean.getLoopDelaySeconds();x++)
+            {
+             TimeUnit.SECONDS.sleep(1);  
+             if(!mBean.getLoop()){
+             loopagain=false;
+             break;}
+            }
+            
+            
+            
+            
         }
         } while (loopagain);
 
 
 
 System.out.println("");  
-System.out.println("Stiv's Beanbagger Finished");  
+System.out.println("Stiv's Beanbagger Finished: " + mBean.getIterationsCount() + " iterations.");  
 
 
     }
@@ -475,13 +475,13 @@ System.out.println("Stiv's Beanbagger Finished");
                   System.out.println("  -j {optionalfilename}:  Output results to single file in JSON format, or to console if no file specified.");
                   System.out.println("                        File will be overwritten each pass.");
                   System.out.println("  -x  :Requires exact match of VM Process Name");
-                  System.out.println("  -q  :Filter. Suppresses output of unsupported types or operations.");
+                  System.out.println("  -u  :Filter. Suppresses output of unsupported types or operations.");
                   System.out.println("  -m  :Filter. Suppresses iteration of Sun beans (sun.*  and com.sun.*");
                   System.out.println("  -r  :Filter. Suppresses logging of unreadable attributes");
                   System.out.println("  -l  {seconds} :Loop continously.   After completion, the dump will rerun in x seconds, default is 30");
                   System.out.println("  -c  {iterations} :Count number of times to run. -c with no options sets to 5. Automatically sets -l");
                   
-                  System.out.println("  -ppj :  Prettyprint JSON output, sets -j but not j- filename." );
+                  System.out.println("  -ppj :  Prettyprint JSON output" );
                   System.out.println("  -log {logdir} :  Write each pass to a new file in logdir with epoch time in the filename." );
 
                   
