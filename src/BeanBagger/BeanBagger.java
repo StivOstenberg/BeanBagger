@@ -45,6 +45,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class BeanBagger {
         
+ 
+
+public static final String ANSI_RESET = "\u001B[0m";
+public static final String ANSI_BLACK = "\u001B[30m";
+public static final String ANSI_RED = "\u001B[31m";
+public static final String ANSI_GREEN = "\u001B[32m";
+public static final String ANSI_YELLOW = "\u001B[33m";
+public static final String ANSI_BLUE = "\u001B[34m";
+public static final String ANSI_PURPLE = "\u001B[35m";
+public static final String ANSI_CYAN = "\u001B[36m";
+public static final String ANSI_WHITE = "\u001B[37m";
+ 
 	private static final String CONNECTOR_ADDRESS_PROPERTY = "com.sun.management.jmxremote.localConnectorAddress";
         public static VirtualMachineDescriptor TARGETDESCRIPTOR ;
         static JMXConnector myJMXconnector = null;
@@ -71,7 +83,7 @@ public class BeanBagger {
                 mBean.setTargetJVM(args[x+1]);
                 x++;
                 break;
-              case "-ppj"  :
+              case "-pp"  :
                  mBean.setprettyprint(true);
                  break; 
               case "-j":
@@ -96,7 +108,7 @@ public class BeanBagger {
                   mBean.setconsoleout(false);
                   break;
               case "-u":
-                  mBean.setsuppresscomplex(false);
+                  mBean.setsuppresscomplex(true);
                   break;
                case "-m":
                    mBean.setsupressSun(true);
@@ -326,12 +338,12 @@ public class BeanBagger {
                                     dooutput = true;
                                 } else {
                                     try {
-                                        if (!attvalue.startsWith("*-")) {
+                                        if (!attvalue.startsWith("*-") ) {
                                             dooutput = true;
                                         }                                        
                                     } catch (Exception ex)//For attributes with no values.
                                     {
-                                        attvalue = "*-No value-*";
+                                        attvalue = "*-Unavailable-*";
                                         dooutput = true;
                                     }
                                 }
@@ -344,9 +356,15 @@ public class BeanBagger {
                                     org.json.JSONObject AtDatas = new org.json.JSONObject();// Create the list of attributes and values into an object.
                                     AtDatas.put("Name", myname);
                                     AtDatas.put("Type", mytype);
+                                    String attvaluecolor="";
+                                    if(attvalue.startsWith("*-")){
+                                        attvaluecolor=ANSI_RED+attvalue+ANSI_RESET;}
+                                    else attvaluecolor=attvalue;
+                                    if(attvalue.equals("")){
+                                        attvaluecolor=ANSI_YELLOW+"\"\""+ANSI_RESET;}
                                     if (myread) {
                                         AtDatas.put("Value", attvalue);
-                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype +  "  Writeable:" + mywrite + "  Readable:" + myread + "  Value:" + attvalue );
+                                        if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype +  "  Writeable:" + mywrite + "  Readable:" + myread + "  Value:" + attvaluecolor );
                                     } else {
                                         if(mBean.getconsoleout())System.out.println("    Name:" + myname + "  Type:" + mytype + "  Writeable:" + mywrite+ "  Readable:" + myread );
                                         AtDatas.put("Readable", myread);
@@ -482,7 +500,7 @@ System.out.println("Stiv's Beanbagger Finished: " + mBean.getIterationsCount() +
                   System.out.println("  -c  {iterations} :Count number of times to run. -c with no options sets to 5. Automatically sets -l");
                   System.out.println("  -q  :Quiet.  Suppresses most console output.");
                   
-                  System.out.println("  -ppj :  Prettyprint JSON output" );
+                  System.out.println("  -pp  :  Prettyprint JSON output" );
                   System.out.println("  -log {logdir} :  Write each pass to a new file in logdir with epoch time in the filename." );
 
                   
