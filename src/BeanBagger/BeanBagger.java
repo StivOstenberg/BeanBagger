@@ -334,7 +334,7 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                         attvalue = "";
                                     }                                    
                                 } catch (Exception ex) {
-                                    attvalue = "*-Exception accessing value-*";
+                                    attvalue = "*-Exception: Unavailable-*";
                                 }
 
                                 //THis section is where we determine if we are going to record the value or not.
@@ -363,9 +363,11 @@ public static final String ANSI_WHITE = "\u001B[37m";
                                     AtDatas.put("Type", mytype);
                                     String attvaluecolor="";
                                     if(attvalue == null)attvalue="*-NULL-*";
-                                    if(attvalue.startsWith("*-")){
+                                    if(attvalue.startsWith("*-U")){
+                                        attvaluecolor=ANSI_PURPLE+attvalue+ANSI_RESET;}
+                                    else if(attvalue.startsWith("*-E")){
                                         attvaluecolor=ANSI_RED+attvalue+ANSI_RESET;}
-                                    else attvaluecolor=attvalue;
+                                    else  attvaluecolor=attvalue;
                                     if(attvalue.equals("")){
                                         attvaluecolor=ANSI_YELLOW+"\"\""+ANSI_RESET;}
                                     if (myread) {
